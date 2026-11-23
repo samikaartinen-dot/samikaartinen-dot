@@ -15,8 +15,8 @@ ja samalla Python-portfolionäyte.
 | Piirtäminen (`generator/workshop.py`) | ✅ valmis ja testattu (Chrome-renderöinti) |
 | Teemapäivät (`generator/themes.py`) | ✅ valmis, 8 teemaa testattu |
 | Config (`config.yml`) + `build.py --offline` | ✅ testattu |
-| Datan haku (`build.py`, live-tila) | ⚠️ kirjoitettu, **EI testattu oikeita rajapintoja vasten** |
-| GitHub Action (`.github/workflows/workshop.yml`) | ⚠️ kirjoitettu, ei ajettu |
+| Datan haku (`build.py`, live-tila) | ✅ toimii Actionissa (GitHub + Open-Meteo), ensimmäinen ajo 23.11.2026 |
+| GitHub Action (`.github/workflows/workshop.yml`) | ✅ ajettu onnistuneesti, commitoi workshop.svg:n |
 | README-teksti | ✅ luonnos, LinkedIn-linkki puuttuu |
 | Projektikortit README:hen | ❌ tekemättä |
 
@@ -48,7 +48,7 @@ ja samalla Python-portfolionäyte.
 Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --out /tmp/vappu.svg`
 
 ## TODO – järjestyksessä
-1. **Luo repo** `samikaartinen-dot` (julkinen, sama nimi kuin käyttäjä) ja pushaa tämä kansio.
+1. ✅ Repo luotu ja pushattu 23.11.2026.
 2. **Testaa live-haku**: aja Action käsin (Actions → Update workshop → Run workflow).
    - Tarkista että `contributions` ei ole tyhjä. Jos GITHUB_TOKEN ei riitä GraphQL-kyselyyn,
      tee fine-grained token (ei oikeuksia, vain julkinen data) → repo secret `WORKSHOP_TOKEN`.
@@ -62,6 +62,13 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
    `cards/*.svg`, linkitetään README:ssä.
 6. Viimeistely: GitHub välimuistittaa kuvat (camo) – tarkista että päivitys näkyy profiilissa
    muutaman tunnin sisällä.
+
+## Havainnot ensimmäisestä live-ajosta
+- Contributions = 2: kaikki muut repot ovat yksityisiä. Sami voi laittaa päälle
+  GitHub-profiilin asetus "Include private contributions on my profile" → LED-lauta täyttyy (vain määrät näkyvät).
+- Kielihylly näyttää vielä esimerkkidataa (PY/JS/C++/SVG), koska julkisia repoja (profiilirepoa lukuun
+  ottamatta) ei ole → korjaa: jos kieliä ei löydy, näytä esim. vain Python tai piilota laatikot.
+- Nixie-laskuri näytti 00000 → tarkista komarev-parsinta (uusi profiili vs. regex).
 
 ## Tunnetut asiat / sudenkuopat
 - Cron on UTC:ssä; `build.py` muuntaa ajan Europe/Helsinki-aikaan (`zoneinfo`).

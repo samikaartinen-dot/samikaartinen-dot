@@ -663,7 +663,7 @@ def render(data):
     for i in range(n):
         a(box(8.0, 4.0, i * 0.1, 1.3, 1.0, 0.1, WOOD_L if i % 2 == 0 else ("#d9b47a", "#b88a52", "#a5783f")))
     sx_, sy2 = iso(8.65, 5.0, 0)
-    a(f'<text x="{sx_ + 58:.1f}" y="{sy2 - 4:.1f}" font-family="{MONO}" font-size="10" fill="#c9b08a">{data["week_commits"]} commits</text>'
+    a(f'<text x="{sx_ + 58:.1f}" y="{sy2 - 4:.1f}" font-family="{MONO}" font-size="10" fill="#c9b08a">{data["week_commits"]} commit{"" if data["week_commits"] == 1 else "s"}</text>'
       f'<text x="{sx_ + 58:.1f}" y="{sy2 + 8:.1f}" font-family="{MONO}" font-size="10" fill="#c9b08a">this week</text>')
 
     # stool
