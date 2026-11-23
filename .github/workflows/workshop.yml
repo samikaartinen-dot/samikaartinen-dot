@@ -1,0 +1,48 @@
+name: Update workshop
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"      # every 2 hours (UTC) so day/night + lamp follow real time
+  workflow_dispatch:             # "Run workflow" button in the Actions tab
+  push:
+    paths:
+      - config.yml
+      - generator/**
+
+permissions:
+  contents: write                # only this repo, nothing else
+
+concurrency:
+  group: workshop
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.repository == 'samikaartinen-dot/samikaartinen-dot'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install pyyaml==6.0.2
+
+      - name: Draw the workshop
+        env:
+          # Built-in token. If contributions come back empty, create a fine-grained
+          # read-only token, save it as repository secret WORKSHOP_TOKEN, and it is used instead.
+          GITHUB_TOKEN: ${{ secrets.WORKSHOP_TOKEN || secrets.GITHUB_TOKEN }}
+        run: python generator/build.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- workshop.svg; then
+            echo "No changes"; exit 0
+          fi
+          git config user.name  "workshop-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workshop.svg
+          git commit -m "chore: update workshop [skip ci]"
+          git push

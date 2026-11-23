@@ -1,0 +1,56 @@
+# ============================================================
+#  Sami's Workshop – these are YOURS to edit (directly on GitHub is fine).
+#  Everything else (commits, languages, weather, date) is fetched automatically.
+# ============================================================
+
+github_user: samikaartinen-dot
+name: Sami Kaartinen
+tagline: Teacher · Maker · Future AI developer
+
+# Weather location (city name is shown in the image – keep it at city level)
+city: Helsinki
+latitude: 60.17
+longitude: 24.94
+timezone: Europe/Helsinki
+show_clock: true          # false = hide the time of day from the image
+
+# "NOW BUILDING" sign on the wall + learning line
+now_building: MANEK V2
+learning: Python
+
+# Project progress bars (update by hand – percentages are your own estimate)
+projects:
+  - { name: MANEK V2,       percent: 62 }
+  - { name: Liigamanageri,  percent: 40 }
+  - { name: Python MOOC,    percent: 35 }
+  - { name: GitHub profile, percent: 80 }
+
+# Post-it notes on the monitor (max 3, max ~10 characters each) – only public stuff!
+todos:
+  - { text: KiCad PCB, color: "#ffd84a" }
+  - { text: firmware,  color: "#ff8fb0" }
+  - { text: README,    color: "#8ef0a8" }
+
+# Trophy shelf (max 6). auto_commits = unlock automatically at N contributions this year
+trophies:
+  - { name: First repo,    unlocked: true }
+  - { name: 100 commits,   auto_commits: 100 }
+  - { name: Profile,       unlocked: true }
+  - { name: MOOC Python,   unlocked: false }
+  - { name: MANEK proto,   unlocked: false }
+  - { name: First AI job,  unlocked: false }
+
+# Wall calendar countdown. Leave label empty -> counts down to Christmas Eve.
+countdown:
+  label: ""               # e.g. "DEMO" (max ~8 chars)
+  date: ""                # e.g. "2027-03-15"
+
+# Split-flap second row rotates through these (max 8 characters each)
+flap_words: [SAMI, MAKER, TEACHER, AI DEV]
+
+# Liiga-style scoreboard (just for fun)
+scoreboard: { home: CODE, home_score: 7, away: BUGS, away_score: 2 }
+
+# Visitor counter (nixie tubes). source: komarev | none
+visitors:
+  source: komarev
