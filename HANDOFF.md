@@ -63,6 +63,11 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 6. Viimeistely: GitHub välimuistittaa kuvat (camo) – tarkista että päivitys näkyy profiilissa
    muutaman tunnin sisällä.
 
+## Työtapa
+- Työ tehdään joko Clauden chatissa (pilvi: kloonaa repo, muokkaa, testaa, pushaa) tai Claude Codessa.
+- Tämä tiedosto on ainoa "muisti": päivitetään jokaisen julkaisun yhteydessä.
+- Isomman kokonaisuuden jälkeen aloitetaan uusi keskustelu: "jatketaan GitHub-pajaa".
+
 ## Tehty 23.11.2026 illalla (pilvessä)
 - Yksityiset contributionit päälle profiilissa → LED-lauta syttyi (342 contributionia).
 - Kielihylly lukee kielet `config.yml`:stä (`languages`), koska koodirepot ovat yksityisiä.
@@ -70,6 +75,11 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
   hakunsa (`data/state.json` → `own_counter_fetches`). Kuka kävi, ei voi tietää – vain määrä.
 - Alateksti: "auto-updated every 2 hours".
 - Projektikortit: MANEK V2, Liigamanageri, Learning Python (`cards/*.svg`).
+- Iso nixie-VISITORS-näyttö pajan vasempaan reunaan; isompi laskurimerkki, klikkaus pysyy profiilissa.
+
+## Ideat (backlog)
+Samin ideoita, joita ei ole vielä toteutettu. Lisää uudet tänne, poista kun tehty.
+- (tyhjä – lisää ensimmäinen idea)
 
 ## Tunnetut asiat / sudenkuopat
 - Actions varoittaa Node 20 -vanhenemisesta (checkout@v4, setup-python@v5): päivitä uusimpiin
