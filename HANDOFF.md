@@ -60,8 +60,9 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 3. ✅ Testit.
 4. **README**: lisää LinkedIn-tunnus kun Sami haluaa; linkit vain julkisiin repoihin.
 5. ✅ Projektikortit.
-6. Viimeistely: GitHub välimuistittaa kuvat (camo) – tarkista että päivitys näkyy profiilissa
-   muutaman tunnin sisällä.
+6. ✅ Välimuisti tarkistettu 23.11.2026: `workshop.svg` ja kortit ovat suhteellisia polkuja,
+   joten ne eivät kulje camo-välimuistin kautta – uusi kuva näkyi profiilissa heti Action-ajon jälkeen.
+   Vain komarev-laskurimerkki kulkee camon kautta.
 
 ## Työtapa
 - Työ tehdään joko Clauden chatissa (pilvi: kloonaa repo, muokkaa, testaa, pushaa) tai Claude Codessa.
@@ -77,13 +78,16 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 - Projektikortit: MANEK V2, Liigamanageri, Learning Python (`cards/*.svg`).
 - Iso nixie-VISITORS-näyttö pajan vasempaan reunaan; isompi laskurimerkki, klikkaus pysyy profiilissa.
 
+## Tehty 23.11.2026 myöhään illalla (pilvessä)
+- Action päivitetty Node 24 -versioihin: `actions/checkout@v6`, `actions/setup-python@v6` → ei enää vanhenemisvaroituksia.
+- Workflow ajetaan nyt myös, kun itse workflow-tiedostoa muutetaan (push-polku lisätty).
+- Live-tarkistus: profiilin kuva päivittyy heti, camo ei hidasta.
+
 ## Ideat (backlog)
 Samin ideoita, joita ei ole vielä toteutettu. Lisää uudet tänne, poista kun tehty.
 - (tyhjä – lisää ensimmäinen idea)
 
 ## Tunnetut asiat / sudenkuopat
-- Actions varoittaa Node 20 -vanhenemisesta (checkout@v4, setup-python@v5): päivitä uusimpiin
-  pääversioihin kun ehdit – toimii nyt silti.
 - Vierailijalaskuri näyttää 0, kunnes profiilissa käydään: laskurimerkki on README:n alareunassa.
 - Cron on UTC:ssä; `build.py` muuntaa ajan Europe/Helsinki-aikaan (`zoneinfo`).
 - Action ajetaan 2 h välein, jotta päivä/yö ja valot seuraavat oikeaa aikaa. Bot-commitit
