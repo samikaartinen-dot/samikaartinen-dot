@@ -15,13 +15,13 @@ Right now I'm building **MANEK**, a screen-free coding game for kids, and learni
 
 ### 🔧 What I'm building
 
-| | Project | |
-|---|---|---|
-| 🦔 | **MANEK V2** | Screen-free coding game: physical command blocks, 8×8 LED grid, Arduino Nano ESP32, KiCad PCBs, laser-cut plywood |
-| 🏒 | **Liigamanageri** | Browser-based manager game for the Finnish ice hockey league |
-| 🐍 | **Python adventure** | A game that teaches Python – built while learning Python myself |
+<p align="center">
+  <img src="./cards/manek.svg" width="32%" alt="MANEK V2 – screen-free coding game for kids" />
+  <img src="./cards/liigamanageri.svg" width="32%" alt="Liigamanageri – Finnish ice hockey manager game" />
+  <img src="./cards/python.svg" width="32%" alt="Learning Python – MOOC and a game that teaches Python" />
+</p>
 
-<!-- TODO: illustrated project cards in the same isometric style; link only to PUBLIC repos -->
+
 
 ---
 
@@ -40,6 +40,11 @@ The picture above is **drawn by a Python script** ([`generator/`](generator/)) a
 | Laser engraving | changes with the repo I updated last |
 | Window | real weather and daylight in Finland |
 | Flag, cake, Christmas tree, vappu balloons… | Finnish flag days and holidays |
-| Shelf boxes, trophies, progress bars | my languages, milestones and [`config.yml`](config.yml) |
+| Shelf boxes, trophies, progress bars, project cards | my languages, milestones and [`config.yml`](config.yml) |
+| Nixie tubes | visitors, counted by the badge at the bottom of this page |
 
 </details>
+
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=samikaartinen-dot&label=workshop%20visitors&color=0e75b6&style=flat" alt="workshop visitors" />
+</p>

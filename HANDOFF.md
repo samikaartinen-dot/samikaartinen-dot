@@ -18,7 +18,9 @@ ja samalla Python-portfolionäyte.
 | Datan haku (`build.py`, live-tila) | ✅ toimii Actionissa (GitHub + Open-Meteo), ensimmäinen ajo 23.11.2026 |
 | GitHub Action (`.github/workflows/workshop.yml`) | ✅ ajettu onnistuneesti, commitoi workshop.svg:n |
 | README-teksti | ✅ luonnos, LinkedIn-linkki puuttuu |
-| Projektikortit README:hen | ❌ tekemättä |
+| Projektikortit README:hen (`generator/cards.py`) | ✅ 3 isometristä korttia, prosentit configista |
+| Vierailijalaskuri | ✅ README:n laskurimerkki + omat haut vähennetään (`data/state.json`) |
+| Testit (`tests/`, pytest) | ✅ 10 testiä, ajetaan Actionissa ennen piirtämistä |
 
 ## Pajan sisältö (päätetty)
 - **MANEK-lauta pöydällä**: 8×8 LEDiä = viimeiset 64 päivää GitHub-aktiivisuutta, tämä päivä sykkii
@@ -49,26 +51,25 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 
 ## TODO – järjestyksessä
 1. ✅ Repo luotu ja pushattu 23.11.2026.
-2. **Testaa live-haku**: aja Action käsin (Actions → Update workshop → Run workflow).
+2. ✅ **Live-haku testattu**: aja Action käsin (Actions → Update workshop → Run workflow).
    - Tarkista että `contributions` ei ole tyhjä. Jos GITHUB_TOKEN ei riitä GraphQL-kyselyyn,
      tee fine-grained token (ei oikeuksia, vain julkinen data) → repo secret `WORKSHOP_TOKEN`.
    - Tarkista Open-Meteo (pitäisi toimia ilman avainta).
    - komarev-laskurin numeron parsiminen SVG:stä on kokeellinen – korjaa regex tarvittaessa
      tai vaihda laskuripalvelu.
-3. **Yksikkötestit** `themes.py`:lle (pääsiäinen, juhannus, äitienpäivä/isänpäivä, liputuspäivät) ja
-   `build_data`:lle (streak, days_since_commit) – pytest.
+3. ✅ Testit.
 4. **README**: lisää LinkedIn-tunnus kun Sami haluaa; linkit vain julkisiin repoihin.
-5. **Projektikortit** samalla isometrisellä tyylillä (MANEK, Liigamanageri, Python-peli) →
-   `cards/*.svg`, linkitetään README:ssä.
+5. ✅ Projektikortit.
 6. Viimeistely: GitHub välimuistittaa kuvat (camo) – tarkista että päivitys näkyy profiilissa
    muutaman tunnin sisällä.
 
-## Havainnot ensimmäisestä live-ajosta
-- Contributions = 2: kaikki muut repot ovat yksityisiä. Sami voi laittaa päälle
-  GitHub-profiilin asetus "Include private contributions on my profile" → LED-lauta täyttyy (vain määrät näkyvät).
-- Kielihylly näyttää vielä esimerkkidataa (PY/JS/C++/SVG), koska julkisia repoja (profiilirepoa lukuun
-  ottamatta) ei ole → korjaa: jos kieliä ei löydy, näytä esim. vain Python tai piilota laatikot.
-- Nixie-laskuri näytti 00000 → tarkista komarev-parsinta (uusi profiili vs. regex).
+## Tehty 23.11.2026 illalla (pilvessä)
+- Yksityiset contributionit päälle profiilissa → LED-lauta syttyi (342 contributionia).
+- Kielihylly lukee kielet `config.yml`:stä (`languages`), koska koodirepot ovat yksityisiä.
+- Vierailijat: README:n alareunan laskurimerkki laskee oikeat käynnit; Action vähentää omat
+  hakunsa (`data/state.json` → `own_counter_fetches`). Kuka kävi, ei voi tietää – vain määrä.
+- Alateksti: "auto-updated every 2 hours".
+- Projektikortit: MANEK V2, Liigamanageri, Learning Python (`cards/*.svg`).
 
 ## Tunnetut asiat / sudenkuopat
 - Cron on UTC:ssä; `build.py` muuntaa ajan Europe/Helsinki-aikaan (`zoneinfo`).

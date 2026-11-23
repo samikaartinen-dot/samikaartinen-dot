@@ -22,6 +22,7 @@ from zoneinfo import ZoneInfo
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent))
+from cards import build_cards  # noqa: E402
 from workshop import DEMO_DATA, render  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -96,17 +97,21 @@ def fetch_github(login, token, today):
             sizes[e["node"]["name"]] = sizes.get(e["node"]["name"], 0) + e["size"]
     top = sorted(sizes.items(), key=lambda kv: -kv[1])[:4]
     total = sum(v for _, v in top) or 1
-    languages = [(LANG_SHORT.get(k, k[:4].upper()), round(100 * v / total)) for k, v in top] or DEMO_DATA["languages"]
+    languages = [(LANG_SHORT.get(k, k[:4].upper()), round(100 * v / total)) for k, v in top]
     latest = repos[0] if repos else None
     msg = ""
     if latest and latest.get("defaultBranchRef") and latest["defaultBranchRef"].get("target"):
         msg = (latest["defaultBranchRef"]["target"].get("message") or "").splitlines()[0]
-    return {
+    out = {
         "contributions": last64, "year_total": year_total, "streak": streak,
         "today_commits": count(today), "week_commits": week, "days_since_commit": since,
         "languages": languages, "latest_repo": latest["name"] if latest else "",
         "last_commit": msg or "hello world",
     }
+    if languages:
+        out["languages"] = languages
+        out["lang_source"] = "by bytes"
+    return out
 
 
 # ------------------------------------------------------------------ weather (Open-Meteo, no key)
@@ -137,8 +142,34 @@ def fetch_visitors(cfg):
     return int(nums[-1].replace(",", "")) if nums else None
 
 
+# ------------------------------------------------------------------ state (own counter fetches)
+STATE = ROOT / "data" / "state.json"
+
+
+def load_state():
+    try:
+        return json.loads(STATE.read_text(encoding="utf-8"))
+    except (FileNotFoundError, ValueError):
+        return {"own_counter_fetches": 0}
+
+
+def save_state(state):
+    STATE.parent.mkdir(exist_ok=True)
+    STATE.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+
+
+def real_visitors(cfg, state):
+    """The counter badge in README.md counts profile views. Our own fetch here also
+    increments it by one, so we keep track of our fetches and subtract them."""
+    raw = fetch_visitors(cfg)
+    if raw is None:
+        return None
+    state["own_counter_fetches"] = state.get("own_counter_fetches", 0) + 1
+    return max(0, raw - state["own_counter_fetches"])
+
+
 # ------------------------------------------------------------------ config -> data
-def build_data(cfg, live, now):
+def build_data(cfg, live, now, state=None):
     today = now.date()
     data = dict(DEMO_DATA)
     data.update({
@@ -150,6 +181,9 @@ def build_data(cfg, live, now):
         "scoreboard": (cfg["scoreboard"]["home"], cfg["scoreboard"]["home_score"],
                        cfg["scoreboard"]["away"], cfg["scoreboard"]["away_score"]),
     })
+    if cfg.get("languages"):
+        data["languages"] = [(l["name"], int(l["share"])) for l in cfg["languages"]]
+        data["lang_source"] = "my stack"
     cd = cfg.get("countdown") or {}
     data["countdown"] = (cd["label"].upper(), cd["date"]) if cd.get("label") and cd.get("date") else None
     data["weather"] = {"city": cfg["city"], "temp": DEMO_DATA["weather"]["temp"], "kind": DEMO_DATA["weather"]["kind"]}
@@ -158,7 +192,7 @@ def build_data(cfg, live, now):
         token = os.environ.get("GITHUB_TOKEN", "")
         for name, fn in [("github", lambda: fetch_github(cfg["github_user"], token, today)),
                          ("weather", lambda: {"weather": fetch_weather(cfg)}),
-                         ("visitors", lambda: {"visitors": fetch_visitors(cfg)})]:
+                         ("visitors", lambda: {"visitors": real_visitors(cfg, state if state is not None else {})})]:
             try:
                 got = fn()
                 data.update({k: v for k, v in got.items() if v is not None})
@@ -191,8 +225,14 @@ def main():
         now = now.replace(year=d.year, month=d.month, day=d.day)
     if args.hour is not None:
         now = now.replace(hour=args.hour)
-    data = build_data(cfg, live=not args.offline, now=now)
+    state = load_state()
+    data = build_data(cfg, live=not args.offline, now=now, state=state)
     Path(args.out).write_text(render(data), encoding="utf-8")
+    if not args.offline:
+        save_state(state)
+    if not args.date:                      # cards only depend on config, skip for theme previews
+        for p in build_cards(cfg, ROOT / "cards"):
+            print(f"wrote {p}")
     print(f"wrote {args.out}  ({data['date']} {data['hour']:02d}:00)")
 
 

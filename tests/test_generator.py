@@ -1,0 +1,83 @@
+"""Run: python -m pytest -q"""
+import sys
+from datetime import date, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "generator"))
+
+import yaml  # noqa: E402
+
+import build  # noqa: E402
+from themes import easter, flag_days, midsummer_day, themes_for  # noqa: E402
+from workshop import render  # noqa: E402
+
+
+# ---------------------------------------------------------------- calendar
+def test_easter_known_years():
+    assert easter(2026) == date(2026, 4, 5)
+    assert easter(2027) == date(2027, 3, 28)
+    assert easter(2028) == date(2028, 4, 16)
+
+
+def test_midsummer_is_saturday_20_to_26_june():
+    for y in range(2024, 2035):
+        d = midsummer_day(y)
+        assert d.weekday() == 5 and 20 <= d.day <= 26 and d.month == 6
+
+
+def test_mothers_and_fathers_day():
+    fd = flag_days(2027)
+    assert fd[date(2027, 5, 9)] in ("Äitienpäivä", "Eurooppa-päivä")   # both fall on 9.5.2027
+    assert fd[date(2027, 11, 14)] == "Isänpäivä"
+
+
+def test_independence_day_age():
+    t = themes_for(date(2026, 12, 6), 12)
+    assert t["flag"] == "Itsenäisyyspäivä"
+    assert t["stool"] == ("cake", 109)
+    assert "candles" in t["tags"]
+
+
+def test_midsummer_eve_flag_from_18():
+    eve = midsummer_day(2027).replace(day=midsummer_day(2027).day - 1)
+    assert themes_for(eve, 17)["flag"] is None
+    assert "Juhannus" in themes_for(eve, 18)["flag"]
+
+
+def test_ordinary_day_has_no_theme():
+    t = themes_for(date(2027, 3, 3), 12)
+    assert t["flag"] is None and not t["tags"] and t["flap"] is None
+
+
+# ---------------------------------------------------------------- build
+def cfg():
+    return yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
+
+
+def test_offline_build_renders_valid_svg():
+    data = build.build_data(cfg(), live=False, now=datetime(2026, 12, 24, 16))
+    svg = render(data)
+    assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
+    assert "<script" not in svg            # image must stay script-free
+    assert "JOULUKUU" in svg               # calendar page (split-flap letters are drawn one by one)
+
+
+def test_config_languages_used_offline():
+    data = build.build_data(cfg(), live=False, now=datetime(2026, 11, 24, 12))
+    assert data["languages"][0][0] == "PY"
+    assert data["lang_source"] == "my stack"
+
+
+def test_visitor_counter_subtracts_own_fetches(monkeypatch):
+    monkeypatch.setattr(build, "fetch_visitors", lambda c: 10)
+    state = {"own_counter_fetches": 3}
+    assert build.real_visitors({}, state) == 6     # 10 - (3 + this fetch)
+    assert state["own_counter_fetches"] == 4
+
+
+def test_trophy_auto_unlock():
+    c = cfg()
+    data = build.build_data(c, live=False, now=datetime(2026, 11, 24, 12))
+    names = dict(data["trophies"])
+    assert names["100 commits"] == (data["year_total"] >= 100)

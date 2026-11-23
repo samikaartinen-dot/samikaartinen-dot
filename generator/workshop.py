@@ -949,7 +949,7 @@ def render(data):
     won = sum(1 for _, t in data["trophies"] if t)
     stats = [("CONTRIBUTIONS", str(data["year_total"]), "this year"),
              ("STREAK", f'{data["streak"]} d', "and counting"),
-             ("TOP LANGUAGE", data["languages"][0][0], "by bytes"),
+             ("TOP LANGUAGE", data["languages"][0][0], data.get("lang_source", "by bytes")),
              ("TROPHIES", f"{won}/{len(data['trophies'])}", "on the shelf")]
     for i, (lab, val, sub) in enumerate(stats):
         x0, y0 = 960, 40 + i * 66
@@ -978,7 +978,7 @@ def render(data):
     a(f'<text x="{lx0 + 100}" y="{ly0 + 22}" font-family="{MONO}" font-size="10" fill="#5d6799">less → more</text>')
     a(f'<text x="{lx0}" y="{ly0 + 44}" font-family="{MONO}" font-size="10" fill="#5d6799">☕ steam = today\'s commits · 🦔 sleeps when I do · nixie = visitors</text>')
     a(f'<text x="{W - 44}" y="{ly0 + 44}" text-anchor="end" font-family="{MONO}" font-size="10" fill="#5d6799">'
-      f'auto-updated daily by a Python script</text>')
+      f'auto-updated every 2 hours by a Python script</text>')
 
     body = "\n".join(out)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '

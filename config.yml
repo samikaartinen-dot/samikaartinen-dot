@@ -14,6 +14,14 @@ longitude: 24.94
 timezone: Europe/Helsinki
 show_clock: true          # false = hide the time of day from the image
 
+# Language boxes on the shelf. Used when GitHub can't see your languages
+# (your code repos are private, so this is the normal case for now).
+languages:
+  - { name: PY,  share: 50 }
+  - { name: JS,  share: 25 }
+  - { name: C++, share: 20 }
+  - { name: SVG, share: 5 }
+
 # "NOW BUILDING" sign on the wall + learning line
 now_building: MANEK V2
 learning: Python
@@ -24,6 +32,33 @@ projects:
   - { name: Liigamanageri,  percent: 40 }
   - { name: Python MOOC,    percent: 35 }
   - { name: GitHub profile, percent: 80 }
+
+# Project cards under the workshop (cards/<slug>.svg). Progress comes from "projects" above.
+cards:
+  - slug: manek
+    title: MANEK V2
+    art: manek
+    project: MANEK V2
+    line1: Screen-free coding game
+    line2: command blocks + 8×8 LEDs
+    tags: [ESP32, KiCad, laser]
+    accent: "#39d353"
+  - slug: liigamanageri
+    title: Liigamanageri
+    art: liiga
+    project: Liigamanageri
+    line1: Finnish ice hockey league
+    line2: manager game in a browser
+    tags: [JS, game, hockey]
+    accent: "#3fa9ff"
+  - slug: python
+    title: Learning Python
+    art: python
+    project: Python MOOC
+    line1: MOOC + a game that teaches
+    line2: Python, built as I learn
+    tags: [Python, MOOC, AI]
+    accent: "#ffc940"
 
 # Post-it notes on the monitor (max 3, max ~10 characters each) – only public stuff!
 todos:

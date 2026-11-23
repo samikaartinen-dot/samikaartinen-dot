@@ -27,7 +27,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip install pyyaml==6.0.2
+      - run: pip install pyyaml==6.0.2 pytest==8.3.3
+
+      - name: Tests
+        run: python -m pytest -q
 
       - name: Draw the workshop
         env:
@@ -38,11 +41,11 @@ jobs:
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- workshop.svg; then
+          git add -A workshop.svg cards data
+          if git diff --cached --quiet; then
             echo "No changes"; exit 0
           fi
           git config user.name  "workshop-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add workshop.svg
           git commit -m "chore: update workshop [skip ci]"
           git push

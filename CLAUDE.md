@@ -8,7 +8,10 @@ Read **HANDOFF.md** first – it lists what is done, what is untested and the TO
 - `generator/workshop.py` – `render(data) -> svg` (pure drawing, iso helpers `iso/box/quad`)
 - `generator/themes.py` – Finnish flag days + holiday themes (`themes_for(date, hour)`)
 - `generator/build.py` – loads config, fetches live data, writes `workshop.svg`
-- `.github/workflows/workshop.yml` – runs build every 2 h and commits the SVG
+- `generator/cards.py` – project cards → `cards/*.svg`
+- `data/state.json` – own visitor-counter fetches (subtracted from the count)
+- `tests/` – pytest, also run in the Action
+- `.github/workflows/workshop.yml` – runs tests + build every 2 h and commits the SVGs
 
 ## Commands
 - Preview without network: `python generator/build.py --offline`
