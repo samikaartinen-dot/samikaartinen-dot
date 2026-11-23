@@ -948,6 +948,18 @@ def render(data):
         a(f'<g transform="translate(46 146)"><rect x="0" y="0" width="16" height="10" fill="#fff"/>'
           f'<rect x="4.5" y="0" width="3" height="10" fill="#003580"/><rect x="0" y="3.5" width="16" height="3" fill="#003580"/>'
           f'<text x="24" y="9" font-family="{MONO}" font-size="12" fill="#c9d1ff">{escape(label)}</text></g>')
+    # big nixie visitor display under the name
+    vx0, vy0 = 44, 196
+    a(f'<text x="{vx0 + 2}" y="{vy0}" font-family="{MONO}" font-size="12" fill="#8b95c9" letter-spacing="2">VISITORS</text>')
+    a(f'<rect x="{vx0}" y="{vy0 + 10}" width="{5 * 36 + 14}" height="76" rx="10" fill="#1b1410" stroke="#8a6a4a" stroke-width="1.5"/>')
+    for k, ch in enumerate(f'{data["visitors"]:05d}'[-5:]):
+        tx_ = vx0 + 10 + k * 36
+        a(f'<rect x="{tx_}" y="{vy0 + 18}" width="30" height="60" rx="15" fill="#120d0a" stroke="#6b5238" stroke-width="1"/>'
+          f'<rect x="{tx_ + 4}" y="{vy0 + 22}" width="5" height="52" rx="2.5" fill="#ffffff" opacity="0.06"/>'
+          f'<text x="{tx_ + 15}" y="{vy0 + 62}" text-anchor="middle" font-family="{MONO}" font-size="34" font-weight="700" '
+          f'fill="#ff8a2a" filter="url(#glow)">{ch}</text>')
+    a(f'<text x="{vx0 + 2}" y="{vy0 + 108}" font-family="{MONO}" font-size="10" fill="#5d6799">thanks for stopping by ✦</text>')
+
     won = sum(1 for _, t in data["trophies"] if t)
     stats = [("CONTRIBUTIONS", str(data["year_total"]), "this year"),
              ("STREAK", f'{data["streak"]} d', "and counting"),
