@@ -85,7 +85,10 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 
 ## Ideat (backlog)
 Samin ideoita, joita ei ole vielä toteutettu. Lisää uudet tänne, poista kun tehty.
-- (tyhjä – lisää ensimmäinen idea)
+- **Siili kiertelee (24.11.2026)**: siili ei kävele aina samaa reittiä, vaan kiertelee ympäri huonetta,
+  nousee välillä penkille tai menee piiloon jonnekin ja kurkistaa sieltä katsojaan päin.
+  Toteutusvihje: muutama valmis reitti (`animateMotion`), build valitsee reitin ajon mukaan → eri reitti 2 h välein;
+  piilo = siili piirretään esineen taakse ja vain pää nousee esiin.
 
 ## Tunnetut asiat / sudenkuopat
 - Vierailijalaskuri näyttää 0, kunnes profiilissa käydään: laskurimerkki on README:n alareunassa.
