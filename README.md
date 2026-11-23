@@ -46,5 +46,5 @@ The picture above is **drawn by a Python script** ([`generator/`](generator/)) a
 </details>
 
 <p align="center">
-  <img src="https://komarev.com/ghpvc/?username=samikaartinen-dot&label=WORKSHOP%20VISITORS&color=ff8a2a&style=for-the-badge&labelColor=1b1410" alt="workshop visitors" />
+  <a href="https://github.com/samikaartinen-dot"><img src="https://komarev.com/ghpvc/?username=samikaartinen-dot&label=WORKSHOP%20VISITORS&color=ff8a2a&style=for-the-badge&labelColor=1b1410" alt="workshop visitors" /></a>
 </p>
