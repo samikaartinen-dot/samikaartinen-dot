@@ -105,7 +105,7 @@ def fetch_github(login, token, today):
     out = {
         "contributions": last64, "year_total": year_total, "streak": streak,
         "today_commits": count(today), "week_commits": week, "days_since_commit": since,
-        "languages": languages, "latest_repo": latest["name"] if latest else "",
+        "latest_repo": latest["name"] if latest else "",
         "last_commit": msg or "hello world",
     }
     if languages:

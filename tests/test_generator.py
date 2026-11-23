@@ -81,3 +81,20 @@ def test_trophy_auto_unlock():
     data = build.build_data(c, live=False, now=datetime(2026, 11, 24, 12))
     names = dict(data["trophies"])
     assert names["100 commits"] == (data["year_total"] >= 100)
+
+
+def test_empty_languages_never_crash():
+    data = build.build_data(cfg(), live=False, now=datetime(2026, 11, 24, 12))
+    data["languages"] = []
+    assert render(data).startswith("<svg")
+
+
+def test_fetch_github_without_public_languages_keeps_config(monkeypatch):
+    fake = {"data": {"user": {
+        "contributionsCollection": {"contributionCalendar": {"weeks": [
+            {"contributionDays": [{"date": "2026-11-24", "contributionCount": 3}]}]}},
+        "repositories": {"nodes": [{"name": "samikaartinen-dot", "defaultBranchRef": None,
+                                    "languages": {"edges": []}}]}}}}
+    monkeypatch.setattr(build, "http_json", lambda *a, **k: fake)
+    got = build.fetch_github("samikaartinen-dot", "x", date(2026, 11, 24))
+    assert "languages" not in got and got["today_commits"] == 3

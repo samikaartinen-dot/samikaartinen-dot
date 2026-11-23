@@ -150,6 +150,8 @@ def greeting(hour):
 
 # ------------------------------------------------------------------ scene
 def render(data):
+    if not data.get("languages"):
+        data = dict(data, languages=DEMO_DATA["languages"])
     d = date.fromisoformat(data["date"])
     hour = data["hour"]
     summer = d.month in (6, 7)
