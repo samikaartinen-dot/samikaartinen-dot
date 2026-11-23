@@ -72,6 +72,9 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 - Projektikortit: MANEK V2, Liigamanageri, Learning Python (`cards/*.svg`).
 
 ## Tunnetut asiat / sudenkuopat
+- Actions varoittaa Node 20 -vanhenemisesta (checkout@v4, setup-python@v5): päivitä uusimpiin
+  pääversioihin kun ehdit – toimii nyt silti.
+- Vierailijalaskuri näyttää 0, kunnes profiilissa käydään: laskurimerkki on README:n alareunassa.
 - Cron on UTC:ssä; `build.py` muuntaa ajan Europe/Helsinki-aikaan (`zoneinfo`).
 - Action ajetaan 2 h välein, jotta päivä/yö ja valot seuraavat oikeaa aikaa. Bot-commitit
   eivät näy omissa contributioneissa.
