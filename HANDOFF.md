@@ -20,7 +20,7 @@ ja samalla Python-portfolionäyte.
 | README-teksti | ✅ luonnos, LinkedIn-linkki puuttuu |
 | Projektikortit README:hen (`generator/cards.py`) | ✅ 3 isometristä korttia, prosentit configista |
 | Vierailijalaskuri | ✅ README:n laskurimerkki + omat haut vähennetään (`data/state.json`) |
-| Testit (`tests/`, pytest) | ✅ 15 testiä, ajetaan Actionissa ennen piirtämistä |
+| Testit (`tests/`, pytest) | ✅ 17 testiä, ajetaan Actionissa ennen piirtämistä |
 
 ## Pajan sisältö (päätetty)
 - **MANEK-lauta pöydällä**: 8×8 LEDiä = viimeiset 64 päivää GitHub-aktiivisuutta, tämä päivä sykkii
@@ -87,6 +87,8 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 - Siili kiertelee: 4 reittiä (vanha kierros, iso kierros, jakkaralle hyppy + katsoo katsojaa, piiloutuu laatikon taakse ja kurkistaa). Edestä katsova sprite `hedgehog_front`.
 - Tekstit luettaviksi profiilin ~600 px leveydessä: isommat tilasto-/projektitekstit, alareunaan vain LED-selite + "redrawn every 2 h by Python".
 - README:n siilirivi päivitetty. 3 uutta testiä.
+- Kello: kuvassa "updated HH:MM" (piirtohetki), ei tasatuntia – elävää kelloa ei voi tehdä, koska GitHub ei aja skriptejä kuvissa.
+- Säähaun aikakatkaisu näytti demo-sään (−3 °C lumi) → nyt viimeisin onnistunut sää tallentuu `data/state.json` → `last_weather` ja sitä käytetään varalla.
 - Esikatsele tiettyä reittiä: monkeypatchaa `workshop.pick_route` (ks. testi `test_only_peek_route_uses_crate_clip`).
 
 ## Ideat (backlog)
