@@ -187,11 +187,20 @@ def build_data(cfg, live, now, state=None):
     cd = cfg.get("countdown") or {}
     data["countdown"] = (cd["label"].upper(), cd["date"]) if cd.get("label") and cd.get("date") else None
     data["weather"] = {"city": cfg["city"], "temp": DEMO_DATA["weather"]["temp"], "kind": DEMO_DATA["weather"]["kind"]}
+    last = (state or {}).get("last_weather")
+    if live and last:   # a failed fetch shows the last real weather, not the demo snow
+        data["weather"] = {"city": cfg["city"], "temp": int(last["temp"]), "kind": last["kind"]}
 
     if live:
         token = os.environ.get("GITHUB_TOKEN", "")
+        def weather():
+            w = fetch_weather(cfg)
+            if state is not None:
+                state["last_weather"] = {"temp": w["temp"], "kind": w["kind"]}
+            return {"weather": w}
+
         for name, fn in [("github", lambda: fetch_github(cfg["github_user"], token, today)),
-                         ("weather", lambda: {"weather": fetch_weather(cfg)}),
+                         ("weather", weather),
                          ("visitors", lambda: {"visitors": real_visitors(cfg, state if state is not None else {})})]:
             try:
                 got = fn()

@@ -130,3 +130,20 @@ def test_clock_shows_update_time():
     svg = render(dict(workshop.DEMO_DATA, hour=16, minute=37))
     assert "updated 16:37" in svg
     assert "updated" not in render(dict(workshop.DEMO_DATA, show_clock=False)).split("Helsinki")[1][:80]
+
+
+def test_failed_weather_uses_last_known(monkeypatch):
+    cfg = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
+    monkeypatch.setattr(build, "fetch_github", lambda *a, **k: {})
+    monkeypatch.setattr(build, "real_visitors", lambda *a, **k: 5)
+
+    def boom(_cfg):
+        raise TimeoutError("handshake timed out")
+    monkeypatch.setattr(build, "fetch_weather", boom)
+    state = {"last_weather": {"temp": 1, "kind": "cloudy"}}
+    data = build.build_data(cfg, live=True, now=datetime(2026, 11, 24, 16, 37), state=state)
+    assert data["weather"]["temp"] == 1 and data["weather"]["kind"] == "cloudy"
+
+    monkeypatch.setattr(build, "fetch_weather", lambda c: {"city": c["city"], "temp": 4, "kind": "rain"})
+    build.build_data(cfg, live=True, now=datetime(2026, 11, 24, 18, 37), state=state)
+    assert state["last_weather"] == {"temp": 4, "kind": "rain"}
