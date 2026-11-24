@@ -36,7 +36,7 @@ The picture above is **drawn by a Python script** ([`generator/`](generator/)) a
 | MANEK LED board (8×8) | my GitHub contributions for the last 64 days |
 | Steam from the coffee mug, multimeter | today's commits |
 | Stack of laser-cut pieces | this week's commits |
-| Manek the hedgehog | walks when I code – sleeps if I haven't committed in 3 days |
+| Manek the hedgehog | wanders, climbs the stool or hides and peeks at you when I code (new route every 2 h) – sleeps if I haven't committed in 3 days |
 | Laser engraving | changes with the repo I updated last |
 | Window | real weather and daylight in Finland |
 | Flag, cake, Christmas tree, vappu balloons… | Finnish flag days and holidays |

@@ -20,7 +20,7 @@ ja samalla Python-portfolionäyte.
 | README-teksti | ✅ luonnos, LinkedIn-linkki puuttuu |
 | Projektikortit README:hen (`generator/cards.py`) | ✅ 3 isometristä korttia, prosentit configista |
 | Vierailijalaskuri | ✅ README:n laskurimerkki + omat haut vähennetään (`data/state.json`) |
-| Testit (`tests/`, pytest) | ✅ 10 testiä, ajetaan Actionissa ennen piirtämistä |
+| Testit (`tests/`, pytest) | ✅ 15 testiä, ajetaan Actionissa ennen piirtämistä |
 
 ## Pajan sisältö (päätetty)
 - **MANEK-lauta pöydällä**: 8×8 LEDiä = viimeiset 64 päivää GitHub-aktiivisuutta, tämä päivä sykkii
@@ -34,7 +34,7 @@ ja samalla Python-portfolionäyte.
 - **Kappalepino** = viikon commitit
 - **PCB-kärry**: MANEK V2 -schema sinikopiona + leijuvat 3D-piirilevyt (LED, Command, Controller)
 - **Steampunk-rattaat** + **nixie-vierailijalaskuri**, **jääkiekkomaila + kiekko**
-- **Manek-siili**: kävelee, kantaa vanerinpalaa jos ≥3 committia tänään, nukkuu laatikossa jos 3 pv ilman committeja
+- **Manek-siili**: 4 reittiä (`ROUTES` workshop.py:ssä: patrol, roam, stool, peek), reitti arvotaan päivämäärä+tunti-siemenellä → vaihtuu 2 h välein; kantaa vanerinpalaa jos ≥3 committia tänään, nukkuu laatikossa jos 3 pv ilman committeja. Jakkarareitti ohitetaan, jos teemapäivän esine on jakkaralla. Piiloreitti käyttää clipPathia `#cratehide` (steampunk-laatikko).
 - **HUD**: nimi, tagline, kaupunki+sää+pvm, 4 tilastokorttia, PROJECTS-paneeli prosentteineen, selitteet
 
 ## Teemapäivät (`themes.py`)
@@ -83,12 +83,15 @@ Esikatselu: `python generator/build.py --offline --date 2027-05-01 --hour 13 --o
 - Workflow ajetaan nyt myös, kun itse workflow-tiedostoa muutetaan (push-polku lisätty).
 - Live-tarkistus: profiilin kuva päivittyy heti, camo ei hidasta.
 
+## Tehty 24.11.2026 (pilvessä)
+- Siili kiertelee: 4 reittiä (vanha kierros, iso kierros, jakkaralle hyppy + katsoo katsojaa, piiloutuu laatikon taakse ja kurkistaa). Edestä katsova sprite `hedgehog_front`.
+- Tekstit luettaviksi profiilin ~600 px leveydessä: isommat tilasto-/projektitekstit, alareunaan vain LED-selite + "redrawn every 2 h by Python".
+- README:n siilirivi päivitetty. 3 uutta testiä.
+- Esikatsele tiettyä reittiä: monkeypatchaa `workshop.pick_route` (ks. testi `test_only_peek_route_uses_crate_clip`).
+
 ## Ideat (backlog)
 Samin ideoita, joita ei ole vielä toteutettu. Lisää uudet tänne, poista kun tehty.
-- **Siili kiertelee (24.11.2026)**: siili ei kävele aina samaa reittiä, vaan kiertelee ympäri huonetta,
-  nousee välillä penkille tai menee piiloon jonnekin ja kurkistaa sieltä katsojaan päin.
-  Toteutusvihje: muutama valmis reitti (`animateMotion`), build valitsee reitin ajon mukaan → eri reitti 2 h välein;
-  piilo = siili piirretään esineen taakse ja vain pää nousee esiin.
+- (tyhjä – lisää seuraava idea)
 
 ## Tunnetut asiat / sudenkuopat
 - Vierailijalaskuri näyttää 0, kunnes profiilissa käydään: laskurimerkki on README:n alareunassa.
