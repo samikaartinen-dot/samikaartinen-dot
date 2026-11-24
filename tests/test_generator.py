@@ -124,3 +124,9 @@ def test_only_peek_route_uses_crate_clip(monkeypatch):
         svg = workshop.render(dict(workshop.DEMO_DATA))
         assert f'data-route="{name}"' in svg
         assert ('clip-path="url(#cratehide)"' in svg) == (name == "peek")
+
+
+def test_clock_shows_update_time():
+    svg = render(dict(workshop.DEMO_DATA, hour=16, minute=37))
+    assert "updated 16:37" in svg
+    assert "updated" not in render(dict(workshop.DEMO_DATA, show_clock=False)).split("Helsinki")[1][:80]

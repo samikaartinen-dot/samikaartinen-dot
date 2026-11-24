@@ -1045,9 +1045,11 @@ def render(data):
     icon = {"snow": "❄", "rain": "☂", "clear": "☀" if not night else "☾", "cloudy": "☁"}.get(w_["kind"], "•")
     a(f'<text x="44" y="64" font-family="{FONT}" font-size="30" font-weight="800" fill="#f3f0e6">{escape(data["name"])}</text>')
     a(f'<text x="46" y="92" font-family="{MONO}" font-size="16" fill="#8b95c9">{escape(data.get("tagline", "Teacher · Maker · Future AI developer"))}</text>')
+    # the image is redrawn every 2 h, so show when it was drawn rather than pretend to be a live clock
+    clock = f"  ·  updated {hour:02d}:{data.get('minute', 0):02d}" if data.get("show_clock", True) else ""
     a(f'<text x="46" y="130" font-family="{MONO}" font-size="14" fill="#7a84b8">'
       f'{escape(w_["city"])} {w_["temp"]:+d}°C {icon}  ·  {d.day}.{d.month}.{d.year}'
-      f'{f" {hour:02d}:00" if data.get("show_clock", True) else ""}</text>')
+      f'{clock}</text>')
     if th["flag"] or th["hud"]:
         label = " · ".join(x for x in [th["hud"], th["flag"]] if x)
         a(f'<g transform="translate(46 146)"><rect x="0" y="0" width="16" height="10" fill="#fff"/>'

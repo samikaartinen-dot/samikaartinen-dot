@@ -173,7 +173,7 @@ def build_data(cfg, live, now, state=None):
     today = now.date()
     data = dict(DEMO_DATA)
     data.update({
-        "name": cfg["name"], "tagline": cfg.get("tagline", ""), "date": today.isoformat(), "hour": now.hour,
+        "name": cfg["name"], "tagline": cfg.get("tagline", ""), "date": today.isoformat(), "hour": now.hour, "minute": now.minute,
         "now_building": cfg["now_building"], "learning": cfg["learning"],
         "projects": [(p["name"], int(p["percent"])) for p in cfg["projects"]],
         "todos": [(t["text"], t.get("color", "#ffd84a")) for t in cfg.get("todos", [])][:3],
@@ -224,7 +224,7 @@ def main():
         d = date.fromisoformat(args.date)
         now = now.replace(year=d.year, month=d.month, day=d.day)
     if args.hour is not None:
-        now = now.replace(hour=args.hour)
+        now = now.replace(hour=args.hour, minute=0)
     state = load_state()
     data = build_data(cfg, live=not args.offline, now=now, state=state)
     Path(args.out).write_text(render(data), encoding="utf-8")
