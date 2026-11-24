@@ -138,6 +138,82 @@ def motif_paths(repo):
     return [gear_path(17, 10), "M-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0"]
 
 
+# ------------------------------------------------------------------ Manek's walks
+# Each route is a loop that starts and ends at HOME. Steps:
+#   ("go", x, y, z)  walk on the floor/stool at walking speed
+#   ("hop", x, y, z) quick jump with an arc (stool)
+#   ("wait", s)      stand still for s seconds
+#   ("face", F)      turn: "R"/"L" = sideways, "F" = looks at the viewer
+HOME = (3.8, 7.6, 0)
+ROUTES = {
+    "patrol": [("go", 6.9, 7.6, 0), ("wait", 0.6), ("go", *HOME), ("wait", 0.6)],
+    "roam":   [("go", 5.8, 8.9, 0), ("go", 7.6, 8.9, 0), ("wait", 0.8), ("face", "F"), ("wait", 1.8),
+               ("go", 5.6, 8.2, 0), ("go", 4.6, 5.4, 0), ("go", 4.2, 4.6, 0), ("face", "F"), ("wait", 1.6),
+               ("go", *HOME), ("wait", 0.6)],
+    "stool":  [("go", 3.1, 5.9, 0), ("hop", 3.07, 4.8, 1.35), ("face", "F"), ("wait", 4.0),
+               ("hop", 3.1, 5.9, 0), ("go", *HOME), ("wait", 0.6)],
+    "peek":   [("go", 3.0, 6.4, 0), ("go", 1.25, 7.15, 0), ("wait", 1.2),
+               ("go", 1.6, 6.9, 0), ("face", "F"), ("wait", 3.5), ("go", 1.25, 7.15, 0), ("wait", 0.8),
+               ("go", 3.0, 6.4, 0), ("go", *HOME), ("wait", 0.6)],
+}
+WALK_SPEED = 0.6      # iso units per second
+HOP_TIME = 0.7
+
+
+def pick_route(day, hour, stool_free=True):
+    """Same route for the whole 2-hour build, a different one (usually) next time."""
+    names = [n for n in ROUTES if stool_free or n != "stool"]
+    return random.Random(f"{day.isoformat()}-{hour}").choice(names)
+
+
+def hedgehog_timeline(route):
+    """Turn a route into SMIL values: positions over time and which sprite is visible."""
+    x, y, z = HOME
+    t, face = 0.0, "R"
+    times, points, faces = [0.0], [iso(x, y, z)], [(0.0, "R")]
+
+    def add(tt, p):
+        times.append(tt)
+        points.append(p)
+
+    for step in ROUTES[route]:
+        kind = step[0]
+        if kind == "wait":
+            t += step[1]
+            add(t, points[-1])
+        elif kind == "face":
+            face = step[1]
+            faces.append((t, face))
+        else:
+            nx, ny, nz = step[1:]
+            a0, b0 = iso(x, y, z), iso(nx, ny, nz)
+            newface = "R" if b0[0] >= a0[0] else "L"
+            if newface != face:
+                face = newface
+                faces.append((t, face))
+            if kind == "hop":
+                mid = ((a0[0] + b0[0]) / 2, min(a0[1], b0[1]) - 18)
+                add(t + HOP_TIME / 2, mid)
+                t += HOP_TIME
+            else:
+                t += max(0.3, math.dist((x, y, z), (nx, ny, nz)) / WALK_SPEED)
+            add(t, b0)
+            x, y, z = nx, ny, nz
+    dur = t
+    kt = ";".join(f"{v / dur:.4f}" for v in times)
+    vals = ";".join(f"{p[0]:.1f} {p[1]:.1f}" for p in points)
+    # one opacity track per sprite (discrete: switches exactly at the turn)
+    tracks = {}
+    for k in ("R", "L", "F"):
+        fk = [(ft, 1 if f == k else 0) for ft, f in faces]
+        fk_t = ";".join(f"{ft / dur:.4f}" for ft, _ in fk)
+        fk_v = ";".join(str(v) for _, v in fk)
+        tracks[k] = (fk[0][1], f'values="{fk_v}" keyTimes="{fk_t}"')
+    start = f"{points[0][0]:.1f} {points[0][1]:.1f}"
+    return ({"dur": dur, "start": start, "pos": f'values="{vals}" keyTimes="{kt}"', "faces": tracks},
+            route == "peek")
+
+
 def greeting(hour):
     if 5 <= hour < 10:
         return "HUOMENTA"
@@ -665,8 +741,8 @@ def render(data):
     for i in range(n):
         a(box(8.0, 4.0, i * 0.1, 1.3, 1.0, 0.1, WOOD_L if i % 2 == 0 else ("#d9b47a", "#b88a52", "#a5783f")))
     sx_, sy2 = iso(8.65, 5.0, 0)
-    a(f'<text x="{sx_ + 58:.1f}" y="{sy2 - 4:.1f}" font-family="{MONO}" font-size="10" fill="#c9b08a">{data["week_commits"]} commit{"" if data["week_commits"] == 1 else "s"}</text>'
-      f'<text x="{sx_ + 58:.1f}" y="{sy2 + 8:.1f}" font-family="{MONO}" font-size="10" fill="#c9b08a">this week</text>')
+    a(f'<text x="{sx_ + 58:.1f}" y="{sy2 - 4:.1f}" font-family="{MONO}" font-size="13" fill="#c9b08a">{data["week_commits"]} commit{"" if data["week_commits"] == 1 else "s"}</text>'
+      f'<text x="{sx_ + 58:.1f}" y="{sy2 + 11:.1f}" font-family="{MONO}" font-size="13" fill="#c9b08a">this week</text>')
 
     # stool
     for lx_, ly_ in [(2.6, 4.3), (3.4, 4.3), (2.6, 5.1), (3.4, 5.1)]:
@@ -766,7 +842,7 @@ def render(data):
     a(box(cx0_ + 0.72, cy0_ + 0.78, cz + 0.05, 0.46, 0.22, 0.05, ("#00979c", "#00777b", "#006165")))
     a('</g>')
     tgx, tgy = iso(cx0_ + cw_, cy0_ + cd_, 0)
-    a(f'<text x="{tgx:.1f}" y="{tgy + 22:.1f}" text-anchor="middle" font-family="{MONO}" font-size="9" fill="#4fd1ff" opacity="0.85">KiCad 3D · MANEK PCBs</text>')
+    a(f'<text x="{tgx:.1f}" y="{tgy + 22:.1f}" text-anchor="middle" font-family="{MONO}" font-size="12" fill="#4fd1ff" opacity="0.85">KiCad 3D · MANEK PCBs</text>')
 
     # ================================================= theme items on the stool
     st = th["stool"]
@@ -904,6 +980,26 @@ def render(data):
             g += hat_svg(hat, sgn, sgn * 12, -9)
         return g
 
+    def hedgehog_front(carry=False, hat=None):
+        sp = []
+        for k in range(15):
+            ang = math.radians(180 + k * 12.86)
+            r_ = 20 if k % 2 else 15
+            sp.append((r_ * math.cos(ang), -4 + r_ * 0.8 * math.sin(ang)))
+        g = (f'<ellipse cx="0" cy="2" rx="16" ry="6" fill="#000" opacity="0.25"/>'
+             f'<polygon points="{" ".join(f"{x:.1f},{y:.1f}" for x, y in sp)}" fill="#5b3a24"/>'
+             f'<ellipse cx="0" cy="-5" rx="14" ry="9" fill="#6e4a2f"/>'
+             f'<ellipse cx="0" cy="-3" rx="9" ry="7" fill="#e2c39b"/>'
+             f'<circle cx="-3.6" cy="-5.5" r="1.7" fill="#1a1a1a"/><circle cx="3.6" cy="-5.5" r="1.7" fill="#1a1a1a"/>'
+             f'<circle cx="-3.1" cy="-6.1" r="0.5" fill="#fff"/><circle cx="4.1" cy="-6.1" r="0.5" fill="#fff"/>'
+             f'<ellipse cx="0" cy="-1.5" rx="2" ry="1.5" fill="#1a1a1a"/>'
+             f'<circle cx="-6" cy="2" r="2" fill="#3a2516"/><circle cx="6" cy="2" r="2" fill="#3a2516"/>')
+        if carry:
+            g += '<rect x="-10" y="-23" width="20" height="5" rx="1" fill="#e3c48f" stroke="#a5783f" stroke-width="0.6"/>'
+        if hat:
+            g += hat_svg(hat, 1, 0, -12)
+        return g
+
     hat = th["hat"]
     if sleeping:
         cx0, cy0 = 4.6, 6.6
@@ -921,26 +1017,35 @@ def render(data):
         anchor_x, anchor_y = hx_, hy_ - 10
     else:
         carry = data["today_commits"] >= 3
-        p_a, p_b = iso(3.8, 7.6, 0), iso(6.9, 7.6, 0)
-        dx, dy = p_b[0] - p_a[0], p_b[1] - p_a[1]
-        walk = f'values="0 0;{dx:.1f} {dy:.1f};{dx:.1f} {dy:.1f};0 0;0 0" keyTimes="0;0.45;0.5;0.95;1"'
-        a(f'<g transform="translate({p_a[0]:.1f} {p_a[1]:.1f})"><g>'
-          f'<animateTransform attributeName="transform" type="translate" dur="12s" repeatCount="indefinite" {walk}/>'
-          f'<g><animate attributeName="opacity" values="1;0;1" keyTimes="0;0.475;0.975" calcMode="discrete" dur="12s" repeatCount="indefinite"/>'
-          f'<g transform="scale(1.45)">{hedgehog(False, carry, hat)}</g></g>'
-          f'<g opacity="0"><animate attributeName="opacity" values="0;1;0" keyTimes="0;0.475;0.975" calcMode="discrete" dur="12s" repeatCount="indefinite"/>'
-          f'<g transform="scale(1.45)">{hedgehog(True, carry, hat)}</g></g>'
-          + ('<g transform="translate(0 -40)"><circle r="1.6" fill="#1a1a1a">'
-             '<animateMotion dur="2.2s" repeatCount="indefinite" path="M0 0 C 18 -10 26 8 8 12 C -14 16 -24 -6 0 0"/></circle>'
-             f'<text x="16" y="-10" font-family="{MONO}" font-size="8" fill="#c9d1ff">bzz</text></g>' if "mosquito" in th["tags"] else "")
-          + f'</g></g>')
+        route = pick_route(d, hour, stool_free=not th["stool"])
+        moves, crate_clip = hedgehog_timeline(route)
+        mosq = ('<g transform="translate(0 -40)"><circle r="1.6" fill="#1a1a1a">'
+                '<animateMotion dur="2.2s" repeatCount="indefinite" path="M0 0 C 18 -10 26 8 8 12 C -14 16 -24 -6 0 0"/></circle>'
+                f'<text x="16" y="-10" font-family="{MONO}" font-size="8" fill="#c9d1ff">bzz</text></g>'
+                if "mosquito" in th["tags"] else "")
+        sprites = {"R": hedgehog(False, carry, hat), "L": hedgehog(True, carry, hat), "F": hedgehog_front(carry, hat)}
+        layers = "".join(
+            f'<g opacity="{op0}"><animate attributeName="opacity" {vals} calcMode="discrete" dur="{moves["dur"]:.1f}s" repeatCount="indefinite"/>'
+            f'<g transform="scale(1.45)">{sprites[k]}</g></g>'
+            for k, (op0, vals) in moves["faces"].items())
+        clip = ' clip-path="url(#cratehide)"' if crate_clip else ""
+        a(f'<g data-route="{route}"{clip}>'
+          f'<g transform="translate({moves["start"]})">'
+          f'<animateTransform attributeName="transform" type="translate" {moves["pos"]} dur="{moves["dur"]:.1f}s" repeatCount="indefinite"/>'
+          f'{layers}{mosq}</g></g>')
+        if crate_clip:
+            # everything except the steampunk crate (and the space above it) – the hedgehog hides behind it
+            c = [iso(1.0, 8.3, 0), iso(2.0, 8.3, 0), iso(2.0, 7.3, 0)]
+            a(f'<defs><clipPath id="cratehide"><path clip-rule="evenodd" d="M0 0 H{W} V{H} H0 Z '
+              f'M{c[0][0]:.1f} 250 L{c[0][0]:.1f} {c[0][1]:.1f} L{c[1][0]:.1f} {c[1][1]:.1f} '
+              f'L{c[2][0]:.1f} {c[2][1]:.1f} L{c[2][0]:.1f} 250 Z"/></clipPath></defs>')
 
     # ================================================= HUD
     w_ = data["weather"]
     icon = {"snow": "❄", "rain": "☂", "clear": "☀" if not night else "☾", "cloudy": "☁"}.get(w_["kind"], "•")
     a(f'<text x="44" y="64" font-family="{FONT}" font-size="30" font-weight="800" fill="#f3f0e6">{escape(data["name"])}</text>')
-    a(f'<text x="46" y="92" font-family="{MONO}" font-size="14" fill="#8b95c9">{escape(data.get("tagline", "Teacher · Maker · Future AI developer"))}</text>')
-    a(f'<text x="46" y="128" font-family="{MONO}" font-size="12" fill="#5d6799">'
+    a(f'<text x="46" y="92" font-family="{MONO}" font-size="16" fill="#8b95c9">{escape(data.get("tagline", "Teacher · Maker · Future AI developer"))}</text>')
+    a(f'<text x="46" y="130" font-family="{MONO}" font-size="14" fill="#7a84b8">'
       f'{escape(w_["city"])} {w_["temp"]:+d}°C {icon}  ·  {d.day}.{d.month}.{d.year}'
       f'{f" {hour:02d}:00" if data.get("show_clock", True) else ""}</text>')
     if th["flag"] or th["hud"]:
@@ -950,7 +1055,7 @@ def render(data):
           f'<text x="24" y="9" font-family="{MONO}" font-size="12" fill="#c9d1ff">{escape(label)}</text></g>')
     # big nixie visitor display under the name
     vx0, vy0 = 44, 196
-    a(f'<text x="{vx0 + 2}" y="{vy0}" font-family="{MONO}" font-size="12" fill="#8b95c9" letter-spacing="2">VISITORS</text>')
+    a(f'<text x="{vx0 + 2}" y="{vy0}" font-family="{MONO}" font-size="14" fill="#8b95c9" letter-spacing="2">VISITORS</text>')
     a(f'<rect x="{vx0}" y="{vy0 + 10}" width="{5 * 36 + 14}" height="76" rx="10" fill="#1b1410" stroke="#8a6a4a" stroke-width="1.5"/>')
     for k, ch in enumerate(f'{data["visitors"]:05d}'[-5:]):
         tx_ = vx0 + 10 + k * 36
@@ -958,7 +1063,7 @@ def render(data):
           f'<rect x="{tx_ + 4}" y="{vy0 + 22}" width="5" height="52" rx="2.5" fill="#ffffff" opacity="0.06"/>'
           f'<text x="{tx_ + 15}" y="{vy0 + 62}" text-anchor="middle" font-family="{MONO}" font-size="34" font-weight="700" '
           f'fill="#ff8a2a" filter="url(#glow)">{ch}</text>')
-    a(f'<text x="{vx0 + 2}" y="{vy0 + 108}" font-family="{MONO}" font-size="10" fill="#5d6799">thanks for stopping by ✦</text>')
+    a(f'<text x="{vx0 + 2}" y="{vy0 + 108}" font-family="{MONO}" font-size="13" fill="#7a84b8">thanks for stopping by ✦</text>')
 
     won = sum(1 for _, t in data["trophies"] if t)
     stats = [("CONTRIBUTIONS", str(data["year_total"]), "this year"),
@@ -968,31 +1073,30 @@ def render(data):
     for i, (lab, val, sub) in enumerate(stats):
         x0, y0 = 960, 40 + i * 66
         a(f'<rect x="{x0}" y="{y0}" width="200" height="56" rx="10" fill="#141a36" stroke="#2f3870"/>')
-        a(f'<text x="{x0 + 14}" y="{y0 + 19}" font-family="{MONO}" font-size="10" fill="#8b95c9" letter-spacing="1">{lab}</text>')
-        a(f'<text x="{x0 + 14}" y="{y0 + 44}" font-family="{FONT}" font-size="21" font-weight="800" fill="#f3f0e6">{escape(val)}</text>')
-        a(f'<text x="{x0 + 186}" y="{y0 + 44}" text-anchor="end" font-family="{MONO}" font-size="10" fill="#5d6799">{sub}</text>')
+        a(f'<text x="{x0 + 14}" y="{y0 + 19}" font-family="{MONO}" font-size="12" fill="#8b95c9" letter-spacing="1">{lab}</text>')
+        a(f'<text x="{x0 + 14}" y="{y0 + 46}" font-family="{FONT}" font-size="23" font-weight="800" fill="#f3f0e6">{escape(val)}</text>')
+        a(f'<text x="{x0 + 186}" y="{y0 + 44}" text-anchor="end" font-family="{MONO}" font-size="12" fill="#7a84b8">{sub}</text>')
 
     px0, py0 = 960, 312
     projs = data["projects"]
-    a(f'<rect x="{px0}" y="{py0}" width="200" height="{34 + len(projs) * 30}" rx="10" fill="#141a36" stroke="#2f3870"/>')
-    a(f'<text x="{px0 + 14}" y="{py0 + 21}" font-family="{MONO}" font-size="10" fill="#8b95c9" letter-spacing="1">PROJECTS</text>')
+    a(f'<rect x="{px0}" y="{py0}" width="200" height="{36 + len(projs) * 34}" rx="10" fill="#141a36" stroke="#2f3870"/>')
+    a(f'<text x="{px0 + 14}" y="{py0 + 21}" font-family="{MONO}" font-size="12" fill="#8b95c9" letter-spacing="1">PROJECTS</text>')
     for i, (pname, pc) in enumerate(projs):
-        yb = py0 + 42 + i * 30
+        yb = py0 + 46 + i * 34
         col = "#39d353" if pc >= 75 else "#ffc940" if pc >= 40 else "#3fa9ff"
-        a(f'<text x="{px0 + 14}" y="{yb}" font-family="{FONT}" font-size="11.5" font-weight="600" fill="#e6e8f5">{escape(pname)}</text>')
-        a(f'<text x="{px0 + 186}" y="{yb}" text-anchor="end" font-family="{MONO}" font-size="11" font-weight="700" fill="{col}">{pc}%</text>')
-        a(f'<rect x="{px0 + 14}" y="{yb + 6}" width="172" height="5" rx="2.5" fill="#262c55"/>')
-        a(f'<rect x="{px0 + 14}" y="{yb + 6}" width="0" height="5" rx="2.5" fill="{col}">'
+        a(f'<text x="{px0 + 14}" y="{yb}" font-family="{FONT}" font-size="14" font-weight="600" fill="#e6e8f5">{escape(pname)}</text>')
+        a(f'<text x="{px0 + 186}" y="{yb}" text-anchor="end" font-family="{MONO}" font-size="13" font-weight="700" fill="{col}">{pc}%</text>')
+        a(f'<rect x="{px0 + 14}" y="{yb + 7}" width="172" height="6" rx="2.5" fill="#262c55"/>')
+        a(f'<rect x="{px0 + 14}" y="{yb + 7}" width="0" height="6" rx="2.5" fill="{col}">'
           f'<animate attributeName="width" values="0;{172 * pc / 100:.1f}" dur="1.6s" begin="{0.3 + i * 0.2:.1f}s" fill="freeze"/></rect>')
 
-    lx0, ly0 = 44, 592
-    a(f'<text x="{lx0}" y="{ly0}" font-family="{MONO}" font-size="11" fill="#8b95c9">MANEK board = my last 64 days on GitHub</text>')
+    # bottom strip: one legend + one footer line, sized to stay readable at profile width
+    lx0, ly0 = 44, 634
     for i, col in enumerate(LED_LEVELS):
-        a(f'<circle cx="{lx0 + 6 + i * 18}" cy="{ly0 + 18}" r="6" fill="{col}"/>')
-    a(f'<text x="{lx0 + 100}" y="{ly0 + 22}" font-family="{MONO}" font-size="10" fill="#5d6799">less → more</text>')
-    a(f'<text x="{lx0}" y="{ly0 + 44}" font-family="{MONO}" font-size="10" fill="#5d6799">☕ steam = today\'s commits · 🦔 sleeps when I do · nixie = visitors</text>')
-    a(f'<text x="{W - 44}" y="{ly0 + 44}" text-anchor="end" font-family="{MONO}" font-size="10" fill="#5d6799">'
-      f'auto-updated every 2 hours by a Python script</text>')
+        a(f'<circle cx="{lx0 + 7 + i * 19}" cy="{ly0 - 5}" r="7" fill="{col}"/>')
+    a(f'<text x="{lx0 + 104}" y="{ly0}" font-family="{MONO}" font-size="13" fill="#8b95c9">MANEK board = my last 64 days</text>')
+    a(f'<text x="{W - 44}" y="{ly0}" text-anchor="end" font-family="{MONO}" font-size="13" fill="#7a84b8">'
+      f'redrawn every 2 h by Python</text>')
 
     body = "\n".join(out)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '

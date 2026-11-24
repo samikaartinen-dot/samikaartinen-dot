@@ -10,6 +10,7 @@ import yaml  # noqa: E402
 
 import build  # noqa: E402
 from themes import easter, flag_days, midsummer_day, themes_for  # noqa: E402
+import workshop  # noqa: E402
 from workshop import render  # noqa: E402
 
 
@@ -98,3 +99,28 @@ def test_fetch_github_without_public_languages_keeps_config(monkeypatch):
     monkeypatch.setattr(build, "http_json", lambda *a, **k: fake)
     got = build.fetch_github("samikaartinen-dot", "x", date(2026, 11, 24))
     assert "languages" not in got and got["today_commits"] == 3
+
+
+def test_hedgehog_routes_loop_back_home():
+    for name in workshop.ROUTES:
+        moves, _ = workshop.hedgehog_timeline(name)
+        pts = moves["pos"].split('"')[1].split(";")
+        assert pts[0] == pts[-1], name                      # seamless loop
+        kts = [float(k) for k in moves["pos"].split('"')[3].split(";")]
+        assert kts[0] == 0 and abs(kts[-1] - 1) < 1e-3 and kts == sorted(kts), name
+
+
+def test_route_changes_with_build_and_skips_busy_stool():
+    d = date(2026, 11, 24)
+    picks = {workshop.pick_route(d, h) for h in range(0, 24, 2)}
+    assert len(picks) >= 3                                   # not the same walk all day
+    assert workshop.pick_route(d, 10) == workshop.pick_route(d, 10)   # stable within one build
+    assert all(workshop.pick_route(d, h, stool_free=False) != "stool" for h in range(24))
+
+
+def test_only_peek_route_uses_crate_clip(monkeypatch):
+    for name in workshop.ROUTES:
+        monkeypatch.setattr(workshop, "pick_route", lambda *a, _n=name, **k: _n)
+        svg = workshop.render(dict(workshop.DEMO_DATA))
+        assert f'data-route="{name}"' in svg
+        assert ('clip-path="url(#cratehide)"' in svg) == (name == "peek")
