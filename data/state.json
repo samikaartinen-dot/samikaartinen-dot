@@ -1,3 +1,7 @@
 {
-  "own_counter_fetches": 10
+  "own_counter_fetches": 11,
+  "last_weather": {
+    "temp": 1,
+    "kind": "cloudy"
+  }
 }
