@@ -1,7 +1,7 @@
 {
-  "own_counter_fetches": 17,
+  "own_counter_fetches": 18,
   "last_weather": {
-    "temp": -3,
+    "temp": -4,
     "kind": "clear"
   }
 }
