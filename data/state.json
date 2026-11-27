@@ -1,7 +1,7 @@
 {
-  "own_counter_fetches": 19,
+  "own_counter_fetches": 20,
   "last_weather": {
     "temp": -3,
-    "kind": "clear"
+    "kind": "cloudy"
   }
 }
